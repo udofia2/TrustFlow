@@ -7,7 +7,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /// @title CharityTracker
 /// @notice Milestone-based charity donation escrow with weighted donor voting (ETH + ERC20).
-/// @dev Phase 1: Contract foundation only (events + base security controls).
+/// @dev Phase 2: Data models and storage structures defined.
 contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     // =============================================================
     //                           EVENTS
@@ -26,6 +26,69 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     // =============================================================
 
     error DirectETHSendRejected();
+
+    // =============================================================
+    //                      DATA STRUCTURES
+    // =============================================================
+
+    /// @notice Project information structure
+    struct Project {
+        uint256 id;
+        address ngo;
+        address donationToken; // address(0) = ETH
+        uint256 goal;
+        uint256 totalDonated;
+        uint256 balance;
+        uint256 currentMilestone;
+        bool isActive;
+        bool isCompleted;
+    }
+
+    /// @notice Milestone information structure
+    struct Milestone {
+        string description;
+        uint256 amountRequested;
+        bool approved;
+        bool fundsReleased;
+        uint256 voteWeight;
+    }
+
+    // =============================================================
+    //                         STORAGE
+    // =============================================================
+
+    /// @notice Mapping of verified NGO addresses
+    mapping(address => bool) public verifiedNGOs;
+
+    /// @notice Counter for project IDs (starts at 1)
+    uint256 public projectCounter;
+
+    /// @notice Mapping of project ID to Project struct
+    mapping(uint256 => Project) public projects;
+
+    /// @notice Mapping of project ID to milestone ID to Milestone struct
+    /// @dev projectId => milestoneId => Milestone
+    mapping(uint256 => mapping(uint256 => Milestone)) public milestones;
+
+    /// @notice Mapping of project ID to total number of milestones
+    /// @dev projectId => milestone count
+    mapping(uint256 => uint256) public projectMilestoneCount;
+
+    /// @notice Mapping of project ID to donor address to contribution amount
+    /// @dev projectId => donor => amount
+    mapping(uint256 => mapping(address => uint256)) public donorContributions;
+
+    /// @notice Mapping of project ID to total donations received
+    /// @dev projectId => total donations
+    mapping(uint256 => uint256) public totalProjectDonations;
+
+    /// @notice Mapping of project ID to milestone ID to donor address to vote status
+    /// @dev projectId => milestoneId => donor => hasVoted
+    mapping(uint256 => mapping(uint256 => mapping(address => bool))) public hasVoted;
+
+    /// @notice Mapping of project ID to milestone ID to donation snapshot at vote start
+    /// @dev projectId => milestoneId => total donations at vote start
+    mapping(uint256 => mapping(uint256 => uint256)) public milestoneSnapshotDonations;
 
     // =============================================================
     //                        CONSTRUCTOR
