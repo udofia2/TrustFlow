@@ -7,7 +7,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /// @title CharityTracker
 /// @notice Milestone-based charity donation escrow with weighted donor voting (ETH + ERC20).
-/// @dev Phase 2: Data models and storage structures defined.
+/// @dev Phase 3: NGO management functions implemented.
 contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     // =============================================================
     //                           EVENTS
@@ -26,6 +26,9 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     // =============================================================
 
     error DirectETHSendRejected();
+    error NGOAlreadyVerified(address ngo);
+    error NGONotVerified(address ngo);
+    error InvalidNGOAddress();
 
     // =============================================================
     //                      DATA STRUCTURES
@@ -108,6 +111,44 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     /// @notice Unpause the contract.
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    // =============================================================
+    //                      NGO MANAGEMENT
+    // =============================================================
+
+    /// @notice Register a new NGO as verified
+    /// @param ngo The address of the NGO to register
+    /// @dev Only owner can register NGOs. Reverts if NGO is already verified or address is zero.
+    function registerNGO(address ngo) external onlyOwner {
+        if (ngo == address(0)) {
+            revert InvalidNGOAddress();
+        }
+        if (verifiedNGOs[ngo]) {
+            revert NGOAlreadyVerified(ngo);
+        }
+
+        verifiedNGOs[ngo] = true;
+        emit NGORegistered(ngo);
+    }
+
+    /// @notice Revoke verification status of an NGO
+    /// @param ngo The address of the NGO to revoke
+    /// @dev Only owner can revoke NGOs. Reverts if NGO is not currently verified.
+    function revokeNGO(address ngo) external onlyOwner {
+        if (!verifiedNGOs[ngo]) {
+            revert NGONotVerified(ngo);
+        }
+
+        verifiedNGOs[ngo] = false;
+        emit NGORevoked(ngo);
+    }
+
+    /// @notice Check if an address is a verified NGO
+    /// @param ngo The address to check
+    /// @return True if the address is a verified NGO, false otherwise
+    function isVerifiedNGO(address ngo) external view returns (bool) {
+        return verifiedNGOs[ngo];
     }
 
     // =============================================================
