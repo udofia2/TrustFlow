@@ -466,6 +466,97 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     }
 
     // =============================================================
+    //                      VIEW FUNCTIONS
+    // =============================================================
+
+    // Phase 10.1: Project Query Functions
+
+    /// @notice Get project information
+    /// @param projectId The ID of the project
+    /// @return The Project struct containing all project data
+    function getProject(uint256 projectId) external view returns (DataStructures.Project memory) {
+        return projects[projectId];
+    }
+
+    /// @notice Get the total number of milestones for a project
+    /// @param projectId The ID of the project
+    /// @return The number of milestones
+    function getProjectMilestoneCount(uint256 projectId) external view returns (uint256) {
+        return projectMilestoneCount[projectId];
+    }
+
+    // Phase 10.2: Milestone Query Functions
+
+    /// @notice Get milestone information
+    /// @param projectId The ID of the project
+    /// @param milestoneId The ID of the milestone
+    /// @return The Milestone struct containing all milestone data
+    function getMilestone(
+        uint256 projectId,
+        uint256 milestoneId
+    ) external view returns (DataStructures.Milestone memory) {
+        return milestones[projectId][milestoneId];
+    }
+
+    /// @notice Get the current milestone for a project
+    /// @param projectId The ID of the project
+    /// @return The current Milestone struct
+    function getCurrentMilestone(
+        uint256 projectId
+    ) external view returns (DataStructures.Milestone memory) {
+        uint256 currentMilestoneId = projects[projectId].currentMilestone;
+        return milestones[projectId][currentMilestoneId];
+    }
+
+    // Phase 10.3: Donation Query Functions
+
+    /// @notice Get a donor's total contribution to a project
+    /// @param projectId The ID of the project
+    /// @param donor The address of the donor
+    /// @return The total amount contributed by the donor
+    function getDonorContribution(
+        uint256 projectId,
+        address donor
+    ) external view returns (uint256) {
+        return donorContributions[projectId][donor];
+    }
+
+    /// @notice Check if a donor has voted on a specific milestone
+    /// @param projectId The ID of the project
+    /// @param milestoneId The ID of the milestone
+    /// @param donor The address of the donor
+    /// @return True if the donor has voted, false otherwise
+    function hasDonorVoted(
+        uint256 projectId,
+        uint256 milestoneId,
+        address donor
+    ) external view returns (bool) {
+        return hasVoted[projectId][milestoneId][donor];
+    }
+
+    // Phase 10.4: Voting Status Function
+
+    /// @notice Get voting status for a milestone
+    /// @param projectId The ID of the project
+    /// @param milestoneId The ID of the milestone
+    /// @return voteWeight The total vote weight for this milestone
+    /// @return snapshot The donation snapshot at vote start
+    /// @return canRelease True if quorum is met and balance is sufficient for release
+    function getMilestoneVoteStatus(
+        uint256 projectId,
+        uint256 milestoneId
+    ) external view returns (uint256 voteWeight, uint256 snapshot, bool canRelease) {
+        DataStructures.Milestone memory milestone = milestones[projectId][milestoneId];
+        voteWeight = milestone.voteWeight;
+        snapshot = milestoneSnapshotDonations[projectId][milestoneId];
+
+        // canRelease = (voteWeight > 50% of snapshot) && (balance >= amountRequested)
+        bool quorumMet = snapshot > 0 && voteWeight > (snapshot * 50) / 100;
+        bool sufficientBalance = projects[projectId].balance >= milestone.amountRequested;
+        canRelease = quorumMet && sufficientBalance;
+    }
+
+    // =============================================================
     //                       ETH HANDLING
     // =============================================================
 
