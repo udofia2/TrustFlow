@@ -4,11 +4,16 @@ pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Errors} from "./libraries/Errors.sol";
+import {DataStructures} from "./types/DataStructures.sol";
 
 /// @title CharityTracker
 /// @notice Milestone-based charity donation escrow with weighted donor voting (ETH + ERC20).
-/// @dev Phase 4: Project creation with milestone validation implemented.
+/// @dev Phase 5: ETH donation function implemented.
 contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
+    using DataStructures for DataStructures.Project;
+    using DataStructures for DataStructures.Milestone;
     // =============================================================
     //                           EVENTS
     // =============================================================
@@ -27,44 +32,10 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     event ProjectCompleted(uint256 indexed projectId);
 
     // =============================================================
-    //                           ERRORS
-    // =============================================================
-
-    error DirectETHSendRejected();
-    error NGOAlreadyVerified(address ngo);
-    error NGONotVerified(address ngo);
-    error InvalidNGOAddress();
-    error NotVerifiedNGO();
-    error InvalidGoal();
-    error InvalidMilestoneArrays();
-    error InvalidMilestoneAmount();
-    error MilestoneSumExceedsGoal();
-
-    // =============================================================
     //                      DATA STRUCTURES
     // =============================================================
-
-    /// @notice Project information structure
-    struct Project {
-        uint256 id;
-        address ngo;
-        address donationToken; // address(0) = ETH
-        uint256 goal;
-        uint256 totalDonated;
-        uint256 balance;
-        uint256 currentMilestone;
-        bool isActive;
-        bool isCompleted;
-    }
-
-    /// @notice Milestone information structure
-    struct Milestone {
-        string description;
-        uint256 amountRequested;
-        bool approved;
-        bool fundsReleased;
-        uint256 voteWeight;
-    }
+    // Note: Structs are defined in DataStructures library
+    // Use DataStructures.Project and DataStructures.Milestone
 
     // =============================================================
     //                         STORAGE
@@ -77,11 +48,11 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     uint256 public projectCounter;
 
     /// @notice Mapping of project ID to Project struct
-    mapping(uint256 => Project) public projects;
+    mapping(uint256 => DataStructures.Project) public projects;
 
     /// @notice Mapping of project ID to milestone ID to Milestone struct
     /// @dev projectId => milestoneId => Milestone
-    mapping(uint256 => mapping(uint256 => Milestone)) public milestones;
+    mapping(uint256 => mapping(uint256 => DataStructures.Milestone)) public milestones;
 
     /// @notice Mapping of project ID to total number of milestones
     /// @dev projectId => milestone count
@@ -132,10 +103,10 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     /// @dev Only owner can register NGOs. Reverts if NGO is already verified or address is zero.
     function registerNGO(address ngo) external onlyOwner {
         if (ngo == address(0)) {
-            revert InvalidNGOAddress();
+            revert Errors.InvalidNGOAddress();
         }
         if (verifiedNGOs[ngo]) {
-            revert NGOAlreadyVerified(ngo);
+            revert Errors.NGOAlreadyVerified(ngo);
         }
 
         verifiedNGOs[ngo] = true;
@@ -147,7 +118,7 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     /// @dev Only owner can revoke NGOs. Reverts if NGO is not currently verified.
     function revokeNGO(address ngo) external onlyOwner {
         if (!verifiedNGOs[ngo]) {
-            revert NGONotVerified(ngo);
+            revert Errors.NGONotVerified(ngo);
         }
 
         verifiedNGOs[ngo] = false;
@@ -181,36 +152,36 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     ) external whenNotPaused returns (uint256 projectId) {
         // Check: Caller is verified NGO
         if (!verifiedNGOs[msg.sender]) {
-            revert NotVerifiedNGO();
+            revert Errors.NotVerifiedNGO();
         }
 
         // Check: Goal > 0
         if (goal == 0) {
-            revert InvalidGoal();
+            revert Errors.InvalidGoal();
         }
 
         // Check: Descriptions and amounts arrays have same length
         if (descriptions.length != amounts.length) {
-            revert InvalidMilestoneArrays();
+            revert Errors.InvalidMilestoneArrays();
         }
 
         // Check: At least one milestone
         if (descriptions.length == 0) {
-            revert InvalidMilestoneArrays();
+            revert Errors.InvalidMilestoneArrays();
         }
 
         // Check: All amounts > 0 and sum <= goal
         uint256 totalAmounts = 0;
         for (uint256 i = 0; i < amounts.length; i++) {
             if (amounts[i] == 0) {
-                revert InvalidMilestoneAmount();
+                revert Errors.InvalidMilestoneAmount();
             }
             totalAmounts += amounts[i];
         }
 
         // Check: Sum of amounts <= goal
         if (totalAmounts > goal) {
-            revert MilestoneSumExceedsGoal();
+            revert Errors.MilestoneSumExceedsGoal();
         }
 
         // Increment project counter (starts at 1)
@@ -218,7 +189,7 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
         projectId = projectCounter;
 
         // Create and store project
-        projects[projectId] = Project({
+        projects[projectId] = DataStructures.Project({
             id: projectId,
             ngo: msg.sender,
             donationToken: donationToken,
@@ -235,7 +206,7 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
 
         // Initialize all milestones
         for (uint256 i = 0; i < descriptions.length; i++) {
-            milestones[projectId][i] = Milestone({
+            milestones[projectId][i] = DataStructures.Milestone({
                 description: descriptions[i],
                 amountRequested: amounts[i],
                 approved: false,
@@ -248,17 +219,57 @@ contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     }
 
     // =============================================================
+    //                      ETH DONATION
+    // =============================================================
+
+    /// @notice Donate ETH to a project
+    /// @param projectId The ID of the project to donate to
+    /// @dev Only works for projects that accept ETH donations. Updates all donation accounting.
+    ///      Follows CEI pattern for security. Reverts if project doesn't exist, is inactive,
+    ///      is completed, or doesn't accept ETH.
+    function donate(uint256 projectId) external payable whenNotPaused nonReentrant {
+        // Validation Checks (CEI Pattern - Checks)
+        if (projects[projectId].id == 0) {
+            revert Errors.ProjectNotFound();
+        }
+        if (!projects[projectId].isActive) {
+            revert Errors.ProjectNotActive();
+        }
+        if (projects[projectId].isCompleted) {
+            revert Errors.ProjectAlreadyCompleted();
+        }
+        if (msg.value == 0) {
+            revert Errors.InvalidDonationAmount();
+        }
+        if (projects[projectId].donationToken != address(0)) {
+            revert Errors.InvalidDonationToken();
+        }
+
+        // State Changes (CEI Pattern - Effects)
+        donorContributions[projectId][msg.sender] += msg.value;
+        totalProjectDonations[projectId] += msg.value;
+        projects[projectId].totalDonated += msg.value;
+        projects[projectId].balance += msg.value;
+
+        // External Calls (CEI Pattern - Interactions)
+        // ETH already received via msg.value (no explicit transfer needed)
+
+        // Events
+        emit DonationReceived(projectId, msg.sender, msg.value);
+    }
+
+    // =============================================================
     //                       ETH HANDLING
     // =============================================================
 
     /// @dev Reject direct ETH transfers. ETH must be sent via `donate` once implemented.
     receive() external payable {
-        revert DirectETHSendRejected();
+        revert Errors.DirectETHSendRejected();
     }
 
     /// @dev Reject unexpected calls with calldata (including accidental ETH sends).
     fallback() external payable {
-        revert DirectETHSendRejected();
+        revert Errors.DirectETHSendRejected();
     }
 }
 
