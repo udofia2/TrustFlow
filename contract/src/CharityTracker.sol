@@ -10,7 +10,7 @@ import {DataStructures} from "./types/DataStructures.sol";
 
 /// @title CharityTracker
 /// @notice Milestone-based charity donation escrow with weighted donor voting (ETH + ERC20).
-/// @dev Phase 5: ETH donation function implemented.
+/// @dev Production-ready contract with full feature implementation.
 contract CharityTracker is Ownable, ReentrancyGuard, Pausable {
     using DataStructures for DataStructures.Project;
     using DataStructures for DataStructures.Milestone;
