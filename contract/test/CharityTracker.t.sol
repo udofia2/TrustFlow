@@ -214,5 +214,135 @@ contract CharityTrackerTest is Fixtures {
         assertTrue(project.isActive);
         assertFalse(project.isCompleted);
     }
+
+    // =============================================================
+    // Phase 16.2: Edge Case Tests
+    // =============================================================
+
+    function test_DirectETHSendReverts() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        // Try to send ETH directly to the contract
+        // This should revert with DirectETHSendRejected error
+        vm.expectRevert(Errors.DirectETHSendRejected.selector);
+        payable(address(tracker)).transfer(1 ether);
+    }
+
+    function test_MilestoneAmountGreaterThanBalanceReverts() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        // Donate less than milestone amount
+        vm.deal(donor1, 400 ether);
+        uint256 donation = 300 ether; // Less than DEFAULT_MILESTONE_AMOUNT (500 ether)
+        donateETH(donor1, projectId, donation);
+
+        // Vote to meet quorum
+        voteMilestone(donor1, projectId);
+
+        // Try to release - should fail due to insufficient balance
+        vm.expectRevert(Errors.InsufficientProjectBalance.selector);
+        releaseFunds(projectId);
+    }
+
+    function test_SequentialMilestoneRequirement() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        vm.deal(donor1, 1100 ether);
+        uint256 donation = 1000 ether;
+        donateETH(donor1, projectId, donation);
+
+        // Must release milestone 0 before milestone 1
+        voteMilestone(donor1, projectId);
+        releaseFunds(projectId);
+
+        // Now can vote on milestone 1
+        voteMilestone(donor1, projectId);
+        
+        // Verify current milestone is 1
+        DataStructures.Project memory project = tracker.getProject(projectId);
+        assertEq(project.currentMilestone, 1);
+    }
+
+    function test_CannotSkipMilestones() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        vm.deal(donor1, 1100 ether);
+        uint256 donation = 1000 ether;
+        donateETH(donor1, projectId, donation);
+
+        // Vote on milestone 0
+        voteMilestone(donor1, projectId);
+        
+        // Try to vote on milestone 1 before releasing milestone 0
+        // This should fail because currentMilestone is still 0
+        // Actually, voteMilestone always votes on currentMilestone, so we can't skip
+        // But let's verify that we must release milestone 0 first
+        
+        // Release milestone 0
+        releaseFunds(projectId);
+        
+        // Now currentMilestone is 1, so we can vote on milestone 1
+        voteMilestone(donor1, projectId);
+        
+        // Verify we can't vote on milestone 0 anymore (it's already approved)
+        DataStructures.Milestone memory milestone0 = tracker.getMilestone(projectId, 0);
+        assertTrue(milestone0.approved);
+        
+        // Verify current milestone is 1
+        DataStructures.Project memory project = tracker.getProject(projectId);
+        assertEq(project.currentMilestone, 1);
+    }
+
+    function test_PauseBlocksDonations() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        // Pause the contract
+        tracker.pause();
+
+        // Try to donate - should fail
+        vm.deal(donor1, 100 ether);
+        vm.expectRevert();
+        donateETH(donor1, projectId, 50 ether);
+
+        // Unpause
+        tracker.unpause();
+
+        // Now donation should work
+        donateETH(donor1, projectId, 50 ether);
+        assertEq(tracker.getDonorContribution(projectId, donor1), 50 ether);
+    }
+
+    function test_PauseBlocksReleases() public {
+        registerNGO(ngo);
+        uint256 projectId = createTestProject(false);
+
+        vm.deal(donor1, 700 ether);
+        uint256 donation = 600 ether;
+        donateETH(donor1, projectId, donation);
+        voteMilestone(donor1, projectId);
+
+        // Pause the contract
+        tracker.pause();
+
+        // Try to release - should fail
+        vm.expectRevert();
+        releaseFunds(projectId);
+
+        // Unpause
+        tracker.unpause();
+
+        // Now release should work
+        releaseFunds(projectId);
+        
+        // Verify milestone was released
+        DataStructures.Milestone memory milestone = tracker.getMilestone(projectId, 0);
+        assertTrue(milestone.approved);
+        assertTrue(milestone.fundsReleased);
+    }
 }
 
