@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { MilestoneCard } from "@/components/project/MilestoneCard";
 import { VotingProgress } from "@/components/project/VotingProgress";
+import { ReleaseFundsButton } from "@/components/project/ReleaseFundsButton";
 import { DonateForm } from "@/components/donation/DonateForm";
 import { DonationHistory } from "@/components/donation/DonationHistory";
 import { WalletConnect } from "@/components/web3/WalletConnect";
@@ -227,10 +228,16 @@ export default function ProjectDetailsPage() {
 
             {/* Voting Progress for Current Milestone */}
             {currentMilestone && (
-              <VotingProgress
-                projectId={projectId}
-                milestoneId={project.currentMilestone}
-              />
+              <div className="space-y-4">
+                <VotingProgress
+                  projectId={projectId}
+                  milestoneId={project.currentMilestone}
+                />
+                {/* Fund Release Button (NGO only) */}
+                {address && address.toLowerCase() === project.ngo.toLowerCase() && (
+                  <ReleaseFundsButton projectId={projectId} />
+                )}
+              </div>
             )}
           </div>
 

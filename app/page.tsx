@@ -22,6 +22,9 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
+              <Link href="/ngo/dashboard" className="text-white hover:underline text-sm">
+                NGO Dashboard
+              </Link>
               <NetworkSwitcher />
               <WalletConnect />
             </div>
