@@ -1,8 +1,13 @@
-import { useReadContract, useAccount } from "wagmi";
+"use client";
+
+import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { type VoteStatus } from "@/types/contract";
 import { formatPercentage } from "@/lib/utils";
 import { type Address } from "viem";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 
 /**
  * Type guard to check if data is a tuple/array
@@ -99,6 +104,82 @@ export function useHasVoted(
     isLoading,
     isError,
     error,
+  };
+}
+
+/**
+ * Hook for voting on milestones
+ */
+export function useVoteMilestone(projectId: number | bigint) {
+  const { address } = useAccount();
+  const queryClient = useQueryClient();
+  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const prevSuccessRef = useRef(false);
+  const prevErrorRef = useRef<Error | null>(null);
+
+  const vote = async () => {
+    if (!address) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+
+    try {
+      await writeContract({
+        address: CHARITY_TRACKER_ADDRESS,
+        abi: CHARITY_TRACKER_ABI,
+        functionName: "voteMilestone",
+        args: [BigInt(projectId)],
+      });
+    } catch (error) {
+      // Error is handled by writeError
+      console.error("Vote error:", error);
+    }
+  };
+
+  // Show toast notifications on success/error changes
+  useEffect(() => {
+    if (isSuccess && !prevSuccessRef.current) {
+      toast.success("Vote recorded successfully!");
+      // Invalidate project queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["voteStatus", projectId] });
+      prevSuccessRef.current = true;
+    }
+  }, [isSuccess, projectId, queryClient]);
+
+  useEffect(() => {
+    const currentError = writeError || receiptError;
+    if (currentError && currentError !== prevErrorRef.current) {
+      const errorMessage = currentError?.message || "Vote failed";
+      toast.error(errorMessage);
+      prevErrorRef.current = currentError;
+    }
+  }, [writeError, receiptError]);
+
+  // Reset refs when transaction starts
+  useEffect(() => {
+    if (isPending) {
+      prevSuccessRef.current = false;
+      prevErrorRef.current = null;
+    }
+  }, [isPending]);
+
+  return {
+    vote,
+    hash,
+    isPending,
+    isConfirming,
+    isSuccess,
+    error: writeError || receiptError,
   };
 }
 
