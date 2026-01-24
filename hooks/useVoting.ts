@@ -74,8 +74,8 @@ export function useMilestoneVoteStatus(
       : "0.0";
 
   // Check if quorum is met (>50%)
-  const quorumMet =
-    voteStatus &&
+  const quorumMet: boolean =
+    !!voteStatus &&
     voteStatus.snapshot > BigInt(0) &&
     voteStatus.voteWeight > voteStatus.snapshot / BigInt(2);
 
