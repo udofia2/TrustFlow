@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useBalance } from "wagmi";
 import { type Address, isAddress, parseEther, parseUnits, formatEther, formatUnits } from "viem";
 import { useDonateETH, useDonateERC20 } from "@/hooks/useDonation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { USDC_ADDRESS } from "@/lib/contract";
+import { parseContractError } from "@/lib/errors";
+import { validateAmount as validateAmountUtil } from "@/lib/validation";
 import toast from "react-hot-toast";
 
 export interface DonateFormProps {
@@ -56,6 +58,7 @@ export function DonateForm({ projectId, donationToken }: DonateFormProps) {
     donate: donateETH,
     isPending: isPendingETH,
     isConfirming: isConfirmingETH,
+    error: errorETH,
   } = useDonateETH(projectId);
 
   const {
@@ -63,9 +66,19 @@ export function DonateForm({ projectId, donationToken }: DonateFormProps) {
     isPending: isPendingERC20,
     isConfirming: isConfirmingERC20,
     allowance,
+    error: errorERC20,
   } = useDonateERC20(projectId, donationToken);
 
   const isPending = isPendingETH || isPendingERC20 || isConfirmingETH || isConfirmingERC20;
+  const donationError = errorETH || errorERC20;
+
+  // Display error from hook if present
+  useEffect(() => {
+    if (donationError) {
+      const errorMessage = parseContractError(donationError);
+      setError(errorMessage);
+    }
+  }, [donationError]);
 
   // Validate amount
   const validateAmount = (value: string): string => {
@@ -73,13 +86,14 @@ export function DonateForm({ projectId, donationToken }: DonateFormProps) {
       return "";
     }
 
-    const numValue = parseFloat(value);
-    if (isNaN(numValue) || numValue <= 0) {
+    // Use validation utility
+    if (!validateAmountUtil(value)) {
       return "Amount must be greater than 0";
     }
 
     // Check if amount exceeds balance
     if (balance) {
+      const numValue = parseFloat(value);
       const balanceNum = parseFloat(formattedBalance);
       if (numValue > balanceNum) {
         return `Insufficient balance. You have ${formattedBalance} ${tokenName}`;
@@ -120,7 +134,10 @@ export function DonateForm({ projectId, donationToken }: DonateFormProps) {
       // Clear form on success (handled by hook's success effect)
       setAmount("");
     } catch (err) {
-      // Error is handled by hooks
+      // Parse and display error
+      const errorMessage = parseContractError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error("Donation error:", err);
     }
   };

@@ -8,6 +8,9 @@ import { useVoteMilestone } from "@/hooks/useVoting";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { formatEther, formatNumber } from "@/lib/utils";
+import { parseContractError } from "@/lib/errors";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 export interface VotingProgressProps {
   projectId: number | bigint;
@@ -33,10 +36,22 @@ export function VotingProgress({
     projectId,
     address
   );
-  const { vote, isPending, isConfirming } = useVoteMilestone(projectId);
+  const { vote, isPending, isConfirming, error: voteError } = useVoteMilestone(projectId);
+  const [voteErrorMessage, setVoteErrorMessage] = useState<string>("");
 
   const isLoading = isLoadingStatus || isLoadingVote || isLoadingContribution;
   const canVote = address && contribution > BigInt(0) && !hasVoted && !isPending && !isConfirming;
+
+  // Handle vote errors
+  useEffect(() => {
+    if (voteError) {
+      const errorMessage = parseContractError(voteError);
+      setVoteErrorMessage(errorMessage);
+      toast.error(errorMessage);
+    } else {
+      setVoteErrorMessage("");
+    }
+  }, [voteError]);
 
   if (isLoading) {
     return (
@@ -125,14 +140,25 @@ export function VotingProgress({
                   You need to contribute to vote on this milestone
                 </p>
               ) : (
-                <Button
-                  variant="primary"
-                  onClick={() => vote()}
-                  isLoading={isPending || isConfirming}
-                  fullWidth
-                >
-                  {isPending ? "Confirming..." : isConfirming ? "Processing..." : "Vote on Milestone"}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setVoteErrorMessage("");
+                      vote();
+                    }}
+                    isLoading={isPending || isConfirming}
+                    disabled={isPending || isConfirming}
+                    fullWidth
+                  >
+                    {isPending ? "Confirming..." : isConfirming ? "Processing..." : "Vote on Milestone"}
+                  </Button>
+                  {voteErrorMessage && (
+                    <p className="text-xs text-charity-red text-center">
+                      {voteErrorMessage}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           )}

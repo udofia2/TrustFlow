@@ -6,6 +6,7 @@ import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { parseContractError } from "@/lib/errors";
 
 /**
  * Minimal ERC20 ABI for approve and allowance functions
@@ -120,8 +121,7 @@ export function useDonateETH(projectId: number | bigint) {
   useEffect(() => {
     const currentError = writeError || receiptError;
     if (currentError && currentError !== prevErrorRef.current) {
-      const errorMessage =
-        currentError?.message || "Donation failed";
+      const errorMessage = parseContractError(currentError);
       toast.error(errorMessage);
       prevErrorRef.current = currentError;
     }
@@ -250,7 +250,7 @@ export function useDonateERC20(
     if (currentError && currentError !== prevErrorRef.current) {
       toast.dismiss("approve");
       toast.dismiss("donate");
-      const errorMessage = currentError?.message || "Donation failed";
+      const errorMessage = parseContractError(currentError);
       toast.error(errorMessage);
       prevErrorRef.current = currentError;
     }

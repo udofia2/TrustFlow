@@ -8,6 +8,7 @@ import { type Address } from "viem";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { parseContractError } from "@/lib/errors";
 
 /**
  * Type guard to check if data is a tuple/array
@@ -159,7 +160,7 @@ export function useVoteMilestone(projectId: number | bigint) {
   useEffect(() => {
     const currentError = writeError || receiptError;
     if (currentError && currentError !== prevErrorRef.current) {
-      const errorMessage = currentError?.message || "Vote failed";
+      const errorMessage = parseContractError(currentError);
       toast.error(errorMessage);
       prevErrorRef.current = currentError;
     }
