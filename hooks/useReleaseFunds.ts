@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useConnection, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -20,9 +20,12 @@ export function useReleaseFunds(projectId: number | bigint): {
   isSuccess: boolean;
   error: Error | null;
 } {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -41,7 +44,7 @@ export function useReleaseFunds(projectId: number | bigint): {
     }
 
     try {
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "releaseFunds",

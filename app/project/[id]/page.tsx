@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useProject, useProjectMilestones, useCurrentMilestone } from "@/hooks/useProject";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { MilestoneCard } from "@/components/project/MilestoneCard";
 import { VotingProgress } from "@/components/project/VotingProgress";
@@ -30,7 +30,7 @@ import Link from "next/link";
 export default function ProjectDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { address } = useAccount();
+  const { address } = useConnection();
 
   // Get projectId from route params
   const projectIdParam = params.id as string;

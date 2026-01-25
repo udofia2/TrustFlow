@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { type Address } from "viem";
 import { useIsVerifiedNGO } from "@/hooks/useNGO";
 import { useAllProjects } from "@/hooks/useProject";
@@ -10,6 +10,7 @@ import { WalletConnect } from "@/components/web3/WalletConnect";
 import { NetworkSwitcher } from "@/components/web3/NetworkSwitcher";
 import { Spinner } from "@/components/ui/Spinner";
 import { Card, CardBody } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { formatAddress, formatEther, formatUSDC, formatNumber } from "@/lib/utils";
 import { isAddress } from "viem";
 import { USDC_ADDRESS } from "@/lib/contract";
@@ -19,16 +20,50 @@ import Link from "next/link";
  * NGO Dashboard page
  */
 export default function NGODashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const { isVerified, isLoading: isLoadingNGO } = useIsVerifiedNGO(address);
   const { projects, isLoading: isLoadingProjects } = useAllProjects();
 
   // Filter projects by NGO address
   const ngoProjects = useMemo(() => {
-    if (!address || !projects) return [];
-    return projects.filter(
+    if (!address || !projects) {
+      console.log("[NGO Dashboard] Filtering projects:", {
+        hasAddress: !!address,
+        address,
+        projectsCount: projects?.length || 0,
+        projects: projects?.map((p) => ({
+          id: p.id.toString(),
+          ngo: p.ngo,
+          ngoLower: p.ngo.toLowerCase(),
+        })),
+      });
+      return [];
+    }
+    
+    const filtered = projects.filter(
       (project) => project.ngo.toLowerCase() === address.toLowerCase()
     );
+    
+    console.log("[NGO Dashboard] Filtered projects:", {
+      totalProjects: projects.length,
+      filteredCount: filtered.length,
+      currentAddress: address,
+      currentAddressLower: address.toLowerCase(),
+      filteredProjects: filtered.map((p) => ({
+        id: p.id.toString(),
+        ngo: p.ngo,
+        ngoLower: p.ngo.toLowerCase(),
+        matches: p.ngo.toLowerCase() === address.toLowerCase(),
+      })),
+      allProjectNGOs: projects.map((p) => ({
+        id: p.id.toString(),
+        ngo: p.ngo,
+        ngoLower: p.ngo.toLowerCase(),
+        matches: p.ngo.toLowerCase() === address.toLowerCase(),
+      })),
+    });
+    
+    return filtered;
   }, [projects, address]);
 
   // Calculate statistics
@@ -132,9 +167,12 @@ export default function NGODashboardPage() {
                 <p className="text-charity-red text-lg font-semibold mb-2">
                   Not a Verified NGO
                 </p>
-                <p className="text-slate-grey opacity-70">
-                  Only verified NGOs can access the dashboard. Please contact the administrator to get verified.
+                <p className="text-slate-grey opacity-70 mb-4">
+                  Only verified NGOs can access the dashboard. Apply to become a verified NGO to get started.
                 </p>
+                <Link href="/ngo/register">
+                  <Button variant="primary">Apply for NGO Verification</Button>
+                </Link>
               </div>
             </CardBody>
           </Card>

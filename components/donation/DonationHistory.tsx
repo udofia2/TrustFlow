@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { type Address, isAddress } from "viem";
 import { useDonorContribution } from "@/hooks/useDonation";
 import { useProject } from "@/hooks/useProject";
@@ -19,7 +19,7 @@ export interface DonationHistoryProps {
  * DonationHistory component for displaying donor's contribution history
  */
 export function DonationHistory({ projectId }: DonationHistoryProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const { contribution, isLoading, isError, error } = useDonorContribution(
     projectId,
     address

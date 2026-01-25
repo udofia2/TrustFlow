@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { type Address } from "viem";
 import { useProject, useCurrentMilestone } from "@/hooks/useProject";
 import { useMilestoneVoteStatus } from "@/hooks/useVoting";
@@ -20,7 +20,7 @@ export interface ReleaseFundsButtonProps {
  * ReleaseFundsButton component for NGOs to release funds
  */
 export function ReleaseFundsButton({ projectId }: ReleaseFundsButtonProps) {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { project, isLoading: isLoadingProject } = useProject(projectId);
   const { milestone: currentMilestone, isLoading: isLoadingMilestone } = useCurrentMilestone(projectId);
   const { voteStatus, quorumMet, isLoading: isLoadingVoteStatus } = useMilestoneVoteStatus(

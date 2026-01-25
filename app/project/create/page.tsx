@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useIsVerifiedNGO } from "@/hooks/useNGO";
 import { type Address, parseEther, parseUnits, isAddress } from "viem";
@@ -34,7 +34,7 @@ interface MilestoneInput {
  */
 export default function CreateProjectPage() {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
   const { isVerified, isLoading: isLoadingNGO } = useIsVerifiedNGO(address);
 
@@ -47,7 +47,10 @@ export default function CreateProjectPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Contract write
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -193,7 +196,7 @@ export default function CreateProjectPage() {
       const descriptions = milestones.map((m) => m.description);
 
       // Call contract
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "createProject",
@@ -265,9 +268,12 @@ export default function CreateProjectPage() {
                 <p className="text-charity-red text-lg font-semibold mb-2">
                   Not a Verified NGO
                 </p>
-                <p className="text-slate-grey opacity-70">
-                  Only verified NGOs can create projects. Please contact the administrator to get verified.
+                <p className="text-slate-grey opacity-70 mb-4">
+                  Only verified NGOs can create projects. Apply to become a verified NGO to get started.
                 </p>
+                <Link href="/ngo/register">
+                  <Button variant="primary">Apply for NGO Verification</Button>
+                </Link>
               </div>
             </CardBody>
           </Card>

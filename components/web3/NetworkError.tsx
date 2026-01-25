@@ -1,6 +1,7 @@
 "use client";
 
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useState, useEffect } from "react";
+import { useConnection, useChainId, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -11,9 +12,20 @@ const BASE_SEPOLIA_CHAIN_ID = 84532;
  * NetworkError component for handling network disconnection and wrong network
  */
 export function NetworkError() {
-  const { isConnected } = useAccount();
+  const { isConnected } = useConnection();
   const chainId = useChainId();
-  const { switchChain, isPending } = useSwitchChain();
+  const switchChain = useSwitchChain();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only checking after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted to prevent false positives
+  if (!mounted) {
+    return null;
+  }
 
   // Check if wrong network
   const isWrongNetwork = isConnected && chainId !== BASE_SEPOLIA_CHAIN_ID;
@@ -28,7 +40,7 @@ export function NetworkError() {
 
   const handleSwitchNetwork = () => {
     try {
-      switchChain({ chainId: BASE_SEPOLIA_CHAIN_ID });
+      switchChain.mutate({ chainId: BASE_SEPOLIA_CHAIN_ID });
     } catch (error) {
       console.error("Failed to switch network:", error);
     }
@@ -64,8 +76,8 @@ export function NetworkError() {
                     variant="secondary"
                     size="sm"
                     onClick={handleSwitchNetwork}
-                    isLoading={isPending}
-                    disabled={isPending}
+                    isLoading={switchChain.isPending}
+                    disabled={switchChain.isPending}
                     className="mt-2"
                   >
                     Switch to Base Sepolia

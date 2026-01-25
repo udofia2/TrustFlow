@@ -20,7 +20,7 @@ interface UIStore {
  * Zustand store for UI state management
  * Manages modal states and selected project IDs
  */
-export const useUIStore = create<UIStore>((set) => ({
+export const useUIStore = create<UIStore>()((set) => ({
   // Initial state
   isDonateModalOpen: false,
   selectedProjectId: null,

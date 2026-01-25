@@ -29,27 +29,50 @@ const defaultChain = {
 };
 
 // Mock implementations
+// useAccount is deprecated but kept for backward compatibility in tests
 export const useAccount = jest.fn(() => ({
   address: defaultAccount.address,
   isConnected: defaultAccount.isConnected,
   chain: defaultChain,
 }));
 
-export const useConnect = jest.fn(() => ({
-  connect: jest.fn(),
-  connectors: [],
-  isPending: false,
-  error: null,
+// Modern replacement for useAccount
+export const useConnection = jest.fn(() => ({
+  address: defaultAccount.address,
+  isConnected: defaultAccount.isConnected,
+  chain: defaultChain,
 }));
 
+export const useConnect = jest.fn(() => ({
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
+  isPending: false,
+  error: null,
+  data: undefined,
+  isSuccess: false,
+  isError: false,
+}));
+
+export const useConnectors = jest.fn(() => []);
+
 export const useDisconnect = jest.fn(() => ({
-  disconnect: jest.fn(),
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
+  isPending: false,
+  error: null,
+  data: undefined,
+  isSuccess: false,
+  isError: false,
 }));
 
 export const useSwitchChain = jest.fn(() => ({
-  switchChain: jest.fn(),
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
   isPending: false,
   error: null,
+  data: undefined,
+  isSuccess: false,
+  isError: false,
 }));
 
 export const useChainId = jest.fn(() => 84532);
@@ -82,10 +105,13 @@ export const useReadContracts = jest.fn(() => ({
 }));
 
 export const useWriteContract = jest.fn(() => ({
-  writeContract: jest.fn(),
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
   data: undefined,
   isPending: false,
   error: null,
+  isSuccess: false,
+  isError: false,
 }));
 
 export const useWaitForTransactionReceipt = jest.fn(() => ({

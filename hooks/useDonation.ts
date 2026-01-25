@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useConnection, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, parseUnits, type Address } from "viem";
 import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { useQueryClient } from "@tanstack/react-query";
@@ -83,9 +83,12 @@ export function useDonateETH(projectId: number | bigint): {
   isSuccess: boolean;
   error: Error | null;
 } {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -111,7 +114,7 @@ export function useDonateETH(projectId: number | bigint): {
     try {
       const amountWei = parseEther(amount);
       
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "donate",
@@ -180,9 +183,12 @@ export function useDonateERC20(
   error: Error | null;
   allowance: bigint;
 } {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -224,17 +230,13 @@ export function useDonateERC20(
       if (currentAllowance < amountParsed) {
         toast.loading("Approving token...", { id: "approve" });
         
-        const approveHash = await writeContract({
+        // writeContract.mutate() returns void, hash is available via writeContract.data
+        writeContract.mutate({
           address: tokenAddress,
           abi: ERC20_ABI,
           functionName: "approve",
           args: [CHARITY_TRACKER_ADDRESS, amountParsed],
         });
-
-        if (!approveHash) {
-          toast.dismiss("approve");
-          return;
-        }
 
         // Wait for approval confirmation
         // Note: In a production app, you'd want to use a separate useWaitForTransactionReceipt
@@ -247,7 +249,7 @@ export function useDonateERC20(
       // Step 2: Donate
       toast.loading("Processing donation...", { id: "donate" });
       
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "donateERC20",

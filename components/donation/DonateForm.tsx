@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useBalance } from "wagmi";
+import { useConnection, useBalance, useReadContracts } from "wagmi";
 import { type Address, isAddress, parseEther, parseUnits, formatEther, formatUnits } from "viem";
+import { erc20Abi } from "viem";
 import { useDonateETH, useDonateERC20 } from "@/hooks/useDonation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -21,7 +22,7 @@ export interface DonateFormProps {
  * DonateForm component for making donations
  */
 export function DonateForm({ projectId, donationToken, onSuccess }: DonateFormProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const [amount, setAmount] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -39,19 +40,46 @@ export function DonateForm({ projectId, donationToken, onSuccess }: DonateFormPr
     },
   });
 
-  const { data: tokenBalance } = useBalance({
-    address,
-    token: !isETH ? donationToken : undefined,
+  // Get ERC20 token balance using useReadContracts (token parameter deprecated in wagmi v3)
+  const { data: tokenData } = useReadContracts({
+    contracts: !isETH && isConnected && address
+      ? [
+          {
+            address: donationToken,
+            abi: erc20Abi,
+            functionName: "balanceOf",
+            args: [address],
+          },
+          {
+            address: donationToken,
+            abi: erc20Abi,
+            functionName: "decimals",
+          },
+        ]
+      : [],
     query: {
-      enabled: isConnected && !isETH,
+      enabled: isConnected && !isETH && !!address,
     },
   });
+
+  // Extract token balance and decimals from contract calls
+  const tokenBalanceValue = tokenData?.[0]?.result as bigint | undefined;
+  const tokenDecimalsFromContract = (tokenData?.[1]?.result as number | undefined) ?? tokenDecimals;
+
+  // Create balance object similar to useBalance return type
+  const tokenBalance = tokenBalanceValue
+    ? {
+        value: tokenBalanceValue,
+        decimals: tokenDecimalsFromContract,
+        symbol: tokenName,
+      }
+    : undefined;
 
   const balance = isETH ? ethBalance : tokenBalance;
   const formattedBalance = balance
     ? isETH
       ? formatEther(balance.value)
-      : formatUnits(balance.value, tokenDecimals)
+      : formatUnits(balance.value, balance.decimals)
     : "0";
 
   // Donation hooks

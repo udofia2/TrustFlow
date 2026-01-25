@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { useMilestoneVoteStatus } from "@/hooks/useVoting";
 import { useHasVoted } from "@/hooks/useVoting";
 import { useDonorContribution } from "@/hooks/useDonation";
@@ -24,7 +24,7 @@ export function VotingProgress({
   projectId,
   milestoneId,
 }: VotingProgressProps) {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { voteStatus, quorumPercentage, quorumMet, isLoading: isLoadingStatus } =
     useMilestoneVoteStatus(projectId, milestoneId);
   const { hasVoted, isLoading: isLoadingVote } = useHasVoted(

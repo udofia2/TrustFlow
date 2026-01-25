@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useReadContract } from "wagmi";
+import { useConnection, useReadContract } from "wagmi";
 import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { type Address } from "viem";
 

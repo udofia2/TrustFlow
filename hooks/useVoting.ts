@@ -1,6 +1,6 @@
 "use client";
 
-import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useReadContract, useConnection, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CHARITY_TRACKER_ADDRESS, CHARITY_TRACKER_ABI } from "@/lib/contract";
 import { type VoteStatus } from "@/types/contract";
 import { formatPercentage } from "@/lib/utils";
@@ -74,8 +74,8 @@ export function useMilestoneVoteStatus(
       : "0.0";
 
   // Check if quorum is met (>50%)
-  const quorumMet =
-    voteStatus &&
+  const quorumMet: boolean =
+    !!voteStatus &&
     voteStatus.snapshot > BigInt(0) &&
     voteStatus.voteWeight > voteStatus.snapshot / BigInt(2);
 
@@ -140,9 +140,12 @@ export function useVoteMilestone(projectId: number | bigint): {
   isSuccess: boolean;
   error: Error | null;
 } {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -161,7 +164,7 @@ export function useVoteMilestone(projectId: number | bigint): {
     }
 
     try {
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "voteMilestone",

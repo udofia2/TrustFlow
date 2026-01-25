@@ -1,10 +1,10 @@
 "use client";
 
-import { useAccount, useSwitchChain } from "wagmi";
+import { useConnection, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const BASE_SEPOLIA_CHAIN_ID = 84532;
 
@@ -12,17 +12,23 @@ const BASE_SEPOLIA_CHAIN_ID = 84532;
  * NetworkSwitcher component for checking and switching to Base Sepolia
  */
 export function NetworkSwitcher() {
-  const { chain, isConnected } = useAccount();
-  const { switchChain, isPending, error } = useSwitchChain();
+  const { chain, isConnected } = useConnection();
+  const switchChain = useSwitchChain();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle switch errors
   useEffect(() => {
-    if (error) {
+    if (switchChain.error) {
       toast.error(
-        error.message || "Failed to switch network. Please switch manually."
+        switchChain.error.message || "Failed to switch network. Please switch manually."
       );
     }
-  }, [error]);
+  }, [switchChain.error]);
 
   // Handle successful switch
   useEffect(() => {
@@ -30,6 +36,11 @@ export function NetworkSwitcher() {
       toast.success("Switched to Base Sepolia");
     }
   }, [chain?.id]);
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   if (!isConnected) {
     return null;
@@ -39,7 +50,7 @@ export function NetworkSwitcher() {
 
   const handleSwitchNetwork = () => {
     try {
-      switchChain({ chainId: BASE_SEPOLIA_CHAIN_ID });
+      switchChain.mutate({ chainId: BASE_SEPOLIA_CHAIN_ID });
     } catch (err) {
       toast.error("Failed to switch network");
     }
@@ -68,8 +79,8 @@ export function NetworkSwitcher() {
         variant="secondary"
         size="sm"
         onClick={handleSwitchNetwork}
-        isLoading={isPending}
-        disabled={isPending}
+        isLoading={switchChain.isPending}
+        disabled={switchChain.isPending}
       >
         Switch to Base Sepolia
       </Button>

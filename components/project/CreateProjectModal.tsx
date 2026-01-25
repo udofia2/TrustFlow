@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useIsVerifiedNGO } from "@/hooks/useNGO";
 import { type Address, parseEther, parseUnits, isAddress } from "viem";
@@ -32,7 +32,7 @@ interface MilestoneInput {
  */
 export function CreateProjectModal() {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
   const { isVerified, isLoading: isLoadingNGO } = useIsVerifiedNGO(address);
   const { isCreateProjectModalOpen, closeCreateProjectModal } = useUIStore();
@@ -46,7 +46,10 @@ export function CreateProjectModal() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Contract write
-  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const writeContract = useWriteContract();
+  const hash = writeContract.data;
+  const isPending = writeContract.isPending;
+  const writeError = writeContract.error;
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -199,7 +202,7 @@ export function CreateProjectModal() {
       const descriptions = milestones.map((m) => m.description);
 
       // Call contract
-      await writeContract({
+      await writeContract.mutate({
         address: CHARITY_TRACKER_ADDRESS,
         abi: CHARITY_TRACKER_ABI,
         functionName: "createProject",
