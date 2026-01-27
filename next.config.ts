@@ -9,16 +9,13 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // Redirects for Facaster Mini App manifest
-  // Uncomment and add your hosted manifest ID when ready
-  // You can get your hosted manifest ID from: https://farcaster.xyz/~/developers/mini-apps/manifest
   async redirects() {
     return [
-      // Example redirect for hosted manifests (uncomment when ready):
-      // {
-      //   source: '/.well-known/farcaster.json',
-      //   destination: 'https://api.farcaster.xyz/miniapps/hosted-manifest/YOUR_MANIFEST_ID',
-      //   permanent: false,
-      // },
+      {
+        source: '/.well-known/farcaster.json',
+        destination: 'https://api.farcaster.xyz/miniapps/hosted-manifest/019bfed2-59ed-504b-3d87-b0835eeba621',
+        permanent: false,
+      },
     ];
   },
   // Enable bundle analyzer when ANALYZE=true
