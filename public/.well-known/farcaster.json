@@ -5,31 +5,28 @@
     "iconUrl": "https://tranct.netlify.app/favicon.ico",
     "homeUrl": "https://tranct.netlify.app",
     "imageUrl": "https://tranct.netlify.app/preview.png",
-    "buttonTitle": "🚀 Track Charity",
-    "splashImageUrl": "https://tranct.netlify.app/splash-screen.png",
-    "splashBackgroundColor": "#003366",
+    "buttonTitle": "Donate",
+    "splashImageUrl": "https://tranct.netlify.app/splash.png",
+    "splashBackgroundColor": "#007FDA",
     "webhookUrl": "https://tranct.netlify.app/api/webhook",
-    "subtitle": "Track donations, milestones, and fund releases",
-    "description": "A transparent blockchain-based charity tracking platform built on Base. Track donations, milestones, and fund releases with full transparency on-chain.",
+    "subtitle": "building trust",
+    "description": "donate transparently",
     "screenshotUrls": [
       "https://tranct.netlify.app/screen-shot.png"
     ],
     "primaryCategory": "finance",
     "tags": [
-      "charity",
-      "transparency",
-      "blockchain",
-      "donation"
+      "social"
     ],
     "heroImageUrl": "https://tranct.netlify.app/hero.png",
-    "tagline": "give",
-    "ogImageUrl": "https://tranct.netlify.app/og-image.png",
-    "ogTitle": "Tranct - Give Transparently"
+    "tagline": "rise",
+    "ogTitle": "Tranct - Donate Transparently",
+    "ogImageUrl": "https://tranct.netlify.app/og-image.png"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjEyNzAyMzEsInR5cGUiOiJhdXRoIiwia2V5IjoiMHg1Q0UwOTRhODU0RWE5MTA4MGVGMjA5ZTNlQjQxOWJkQjBjZTRFZTFkIn0",
-    "payload": "eyJkb21haW4iOiJodHRwczovL2h0dHBzOi8vdHJhbmN0Lm5ldGxpZnkuYXBwIn0",
-    "signature": "GyPxrZgoRVmo9JG53TCFdKiqz3CXMFVN5wV/K2a7n+w6+IapbSSfFYrd7a02LZlaFCeqmiE2yIUOATgwzocGoxs="
+    "payload": "eyJkb21haW4iOiJodHRwczovL3RyYW5jdC5uZXRsaWZ5LmFwcCJ9",
+    "signature": "StnsswnfmxV0jvecERhb9HXrzt4+fzTji82IC0s6+GkuZylGuF7Qp+daxnNn5HxYv5zf+QhWj7IC4ZArizdvtBw="
   }
 }
 
