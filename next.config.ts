@@ -8,16 +8,18 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Redirects for Facaster Mini App manifest
-  async redirects() {
-    return [
-      {
-        source: '/.well-known/farcaster.json',
-        destination: 'https://api.farcaster.xyz/miniapps/hosted-manifest/019bfed2-59ed-504b-3d87-b0835eeba621',
-        permanent: false,
-      },
-    ];
-  },
+  // Redirects for Farcaster Mini App manifest
+  // NOTE: If using local manifest file, remove this redirect
+  // If using hosted manifest, uncomment and update the destination URL
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/.well-known/farcaster.json',
+  //       destination: 'https://api.farcaster.xyz/miniapps/hosted-manifest/019bfed2-59ed-504b-3d87-b0835eeba621',
+  //       permanent: false,
+  //     },
+  //   ];
+  // },
   // Enable bundle analyzer when ANALYZE=true
   ...(process.env.ANALYZE === "true" && {
     webpack: (config: any) => {
