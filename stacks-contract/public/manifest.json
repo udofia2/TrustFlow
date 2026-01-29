@@ -1,0 +1,48 @@
+{
+  "name": "Ilenoid",
+  "short_name": "Ilenoid",
+  "description": "A transparent blockchain-based charity tracking platform built on Stacks",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#003366",
+  "theme_color": "#2ECC71",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "social", "charity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Create Project",
+      "short_name": "Create",
+      "description": "Create a new charity project",
+      "url": "/project/create",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "NGO Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your NGO dashboard",
+      "url": "/ngo/dashboard",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

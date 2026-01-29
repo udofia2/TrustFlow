@@ -1,0 +1,32 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "Transparent Charity Tracker",
+    "iconUrl": "https://tranct.netlify.app/favicon.ico",
+    "homeUrl": "https://tranct.netlify.app",
+    "imageUrl": "https://tranct.netlify.app/og-image.png",
+    "buttonTitle": "🚀 Track Charity",
+    "splashImageUrl": "https://tranct.netlify.app/logo.png",
+    "splashBackgroundColor": "#003366",
+    "description": "A transparent blockchain-based charity tracking platform built on Base. Track donations, milestones, and fund releases with full transparency on-chain.",
+    "subtitle": "Track donations, milestones, and fund releases",
+    "requiredChains": [
+      "eip155:8453",
+      "eip155:84532"
+    ],
+    "requiredCapabilities": [
+      "actions.signIn",
+      "wallet.getEthereumProvider"
+    ],
+    "primaryCategory": "finance",
+    "tags": [
+      "charity",
+      "transparency",
+      "blockchain",
+      "base",
+      "donations",
+      "web3"
+    ]
+  }
+}
+
