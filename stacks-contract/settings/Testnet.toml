@@ -1,0 +1,23 @@
+[network]
+name = "testnet"
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+# IMPORTANT: Use your own 24-word BIP39 mnemonic for testnet deployments.
+# Never commit real mnemonics to version control.
+#
+# To generate a new testnet mnemonic, use:
+#   npm install -g @stacks/cli
+#   stx make_keychain -t > testnet_keychain.json
+#
+# For security, it is strongly suggested to use encrypted mnemonics:
+#   clarinet deployments encrypt
+#
+# Enter your seed phrase and a password, then paste the encrypted mnemonic here.
+# Otherwise, use the mnemonic field below:
+#
+# Note: Clarinet 2.15.0+ requires 24-word mnemonics (12-word no longer supported)
+# Encrypted mnemonic for address: ST2W758Q6BS97GWK7STXTAW2ZG26YFXE4V5WMTG3Q
+# When deploying, Clarinet will prompt for the password to decrypt this mnemonic
+encrypted_mnemonic = "8zEXAkECpPuwRryxKoK5iyjGm5b5uFWdWePQppS3UNWe5ou2S2vzob5Qk2k5ApPHj3K3aSsHXrJBG2e1WFi68JW9H1f4m1Fc4go5VXMczCi5N5rQNQqn9Dxm3DL1Qipo6sRRrnUmFLUrpsXzRPqxadRQ6woqCeK1N9ijyEEDfZBZ31Yete7pU2g8YEuLAQXDdECWL331MH3R44Q2TbH9Rj6UDZqGdtSxGedvGdRWwXJZgQCoz5Efj8oog"
