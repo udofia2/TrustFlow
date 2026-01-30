@@ -1,0 +1,22 @@
+[network]
+name = "mainnet"
+stacks_node_rpc_address = "https://api.hiro.so"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+# ⚠️  SECURITY WARNING: Mainnet deployments require real STX and real funds.
+# Never commit mainnet mnemonics to version control or share them publicly.
+#
+# To generate a new mainnet mnemonic, use:
+#   npm install -g @stacks/cli
+#   stx make_keychain > mainnet_keychain.json
+#
+# For security, it is STRONGLY RECOMMENDED to use encrypted mnemonics:
+#   clarinet deployments encrypt
+#
+# Enter your seed phrase and a password, then paste the encrypted mnemonic here.
+# Otherwise, use the mnemonic field below:
+#
+# Note: Clarinet 2.15.0+ requires 24-word mnemonics (12-word no longer supported)
+# Note: Ensure your account has sufficient STX for deployment fees
+mnemonic = "8zEXAkECpPuwRryxKoK5iyjGm5b5uFWdWePQppS3UNWe5ou2S2vzob5Qk2k5ApPHj3K3aSsHXrJBG2e1WFi68JW9H1f4m1Fc4go5VXMczCi5N5rQNQqn9Dxm3DL1Qipo6sRRrnUmFLUrpsXzRPqxadRQ6woqCeK1N9ijyEEDfZBZ31Yete7pU2g8YEuLAQXDdECWL331MH3R44Q2TbH9Rj6UDZqGdtSxGedvGdRWwXJZgQCoz5Efj8oog"

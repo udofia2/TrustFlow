@@ -36,7 +36,7 @@ export default function AdminNGOPage() {
   const { owner, isOwner, isLoading: isLoadingOwner } = useContractOwner();
   const { registerNGO, isPending: isRegistering, isConfirming: isConfirmingRegister } = useRegisterNGO();
   const { revokeNGO, isPending: isRevoking, isConfirming: isConfirmingRevoke } = useRevokeNGO();
-  
+
   const [applications, setApplications] = useState<NGOApplication[]>([]);
   const [verifiedNGOs, setVerifiedNGOs] = useState<Address[]>([]);
   const [directRegisterAddress, setDirectRegisterAddress] = useState("");
@@ -70,7 +70,7 @@ export default function AdminNGOPage() {
       );
       setApplications(updated);
       localStorage.setItem("ngo_applications", JSON.stringify(updated));
-      
+
       // Also update individual application
       localStorage.setItem(
         `ngo_application_${application.walletAddress.toLowerCase()}`,
@@ -94,7 +94,7 @@ export default function AdminNGOPage() {
       );
       setApplications(updated);
       localStorage.setItem("ngo_applications", JSON.stringify(updated));
-      
+
       // Also update individual application
       localStorage.setItem(
         `ngo_application_${application.walletAddress.toLowerCase()}`,
@@ -257,6 +257,10 @@ export default function AdminNGOPage() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <Link href="/admin/settings" className="text-white hover:underline text-sm">
+                Settings
+              </Link>
+              <div className="h-4 w-px bg-white/30"></div>
               <Link href="/" className="text-white hover:underline text-sm">
                 ← Home
               </Link>
@@ -287,11 +291,10 @@ export default function AdminNGOPage() {
                   setDirectRegisterError("");
                 }}
                 placeholder="0x..."
-                className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-green focus:border-transparent ${
-                  directRegisterError
+                className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-green focus:border-transparent ${directRegisterError
                     ? "border-charity-red"
                     : "border-slate-grey border-opacity-30"
-                }`}
+                  }`}
               />
               <Button
                 variant="primary"

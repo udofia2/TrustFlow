@@ -1,0 +1,25 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: ilenoid
+            expected-sender: ST2W758Q6BS97GWK7STXTAW2ZG26YFXE4V5WMTG3Q
+            cost: 319380
+            path: contracts/ilenoid.clar
+            anchor-block-only: true
+            clarity-version: 4
+        - contract-publish:
+            contract-name: ngo-registry
+            expected-sender: ST2W758Q6BS97GWK7STXTAW2ZG26YFXE4V5WMTG3Q
+            cost: 2580
+            path: contracts/ngo-registry.clar
+            anchor-block-only: true
+            clarity-version: 4
+      epoch: "3.3"

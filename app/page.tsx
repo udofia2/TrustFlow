@@ -5,6 +5,7 @@ import { WalletConnect } from "@/components/web3/WalletConnect";
 import { NetworkSwitcher } from "@/components/web3/NetworkSwitcher";
 import { Button } from "@/components/ui/Button";
 import { useUIStore } from "@/stores/uiStore";
+import { useContractOwner } from "@/hooks/useContractOwner";
 import Link from "next/link";
 
 /**
@@ -12,6 +13,7 @@ import Link from "next/link";
  */
 export default function Home() {
   const { openCreateProjectModal } = useUIStore();
+  const { isOwner } = useContractOwner();
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -25,6 +27,11 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
+              {isOwner && (
+                <Link href="/admin/ngos" className="text-bitcoin-orange hover:text-white hover:underline text-sm font-bold">
+                  Admin Dashboard
+                </Link>
+              )}
               <Link href="/ngo/dashboard" className="text-white hover:underline text-sm">
                 NGO Dashboard
               </Link>
