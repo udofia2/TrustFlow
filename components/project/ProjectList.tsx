@@ -96,7 +96,7 @@ export function ProjectList({ searchQuery = "" }: ProjectListProps) {
   return (
     <div className="space-y-6">
       {/* Demo mode notice banner */}
-      {isDemo && (
+      {/* {isDemo && (
         <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
           <svg className="w-5 h-5 mt-0.5 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -109,7 +109,7 @@ export function ProjectList({ searchQuery = "" }: ProjectListProps) {
             Connect your wallet and switch to Base to see live data.
           </span>
         </div>
-      )}
+      )} */}
 
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">

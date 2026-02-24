@@ -50,7 +50,7 @@ export default function ProjectDetailsPage() {
         <header className="bg-deep-blue text-white shadow-md">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Link href="/" className="text-white hover:underline">
+              <Link href="/projects" className="text-white hover:underline">
                 ← Back to Projects
               </Link>
               <div className="flex items-center gap-4">
@@ -70,7 +70,7 @@ export default function ProjectDetailsPage() {
                 <p className="text-slate-grey opacity-70 mb-4">
                   {projectError?.message || "The project you're looking for doesn't exist."}
                 </p>
-                <Link href="/">
+                <Link href="/projects">
                   <button className="px-6 py-2 bg-deep-blue text-white rounded-lg hover:bg-deep-blue-hover transition-colors">
                     Back to Projects
                   </button>
@@ -120,7 +120,7 @@ export default function ProjectDetailsPage() {
       <header className="bg-deep-blue text-white shadow-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <Link href="/" className="text-white hover:underline">
+            <Link href="/projects" className="text-white hover:underline">
               ← Back to Projects
             </Link>
             <div className="flex items-center gap-4">

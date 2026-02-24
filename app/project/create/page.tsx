@@ -225,7 +225,7 @@ export default function CreateProjectPage() {
       <header className="bg-deep-blue text-white shadow-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <Link href="/" className="text-white hover:underline">
+            <Link href="/projects" className="text-white hover:underline">
               ← Back to Projects
             </Link>
             <div className="flex items-center gap-4">
